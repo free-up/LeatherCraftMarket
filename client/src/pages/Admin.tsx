@@ -22,7 +22,6 @@ import type { InsertProduct } from "@shared/schema";
 import { Archive, Trash2, Eye, Pencil } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
-import { UploadButton } from "@/lib/uploadthing";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -207,6 +206,35 @@ export default function Admin() {
     );
   };
 
+  const handleFileUpload = async (file: File, field: any) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки файла');
+      }
+
+      const data = await response.json();
+      field.onChange(data.url);
+      toast({
+        title: "Успешно",
+        description: "Изображение загружено",
+      });
+    } catch (error) {
+      toast({
+        title: "Ошибка загрузки",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -269,22 +297,27 @@ export default function Admin() {
                       <div className="flex gap-2">
                         <FormControl>
                           <div className="flex gap-2 items-center">
-                            <Input {...field} type="url" placeholder="URL изображения" />
-                            <UploadButton
-                              endpoint="imageUploader"
-                              onClientUploadComplete={(res) => {
-                                if (res?.[0]) {
-                                  field.onChange(res[0].url);
+                            <Input {...field} type="url" placeholder="URL изображения или загрузите файл" />
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              id={`file-upload-${index}`}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload(file, field);
                                 }
                               }}
-                              onUploadError={(error: Error) => {
-                                toast({
-                                  title: "Ошибка загрузки",
-                                  description: error.message,
-                                  variant: "destructive",
-                                });
-                              }}
                             />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => document.getElementById(`file-upload-${index}`)?.click()}
+                            >
+                              Загрузить файл
+                            </Button>
                           </div>
                         </FormControl>
                         {index > 0 && (

@@ -6,6 +6,7 @@ import { Link } from "wouter";
 import type { Product } from "@shared/schema";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -89,6 +90,13 @@ export default function ProductDetails() {
               </Button>
             </>
           )}
+          {product.archived && (
+            <div className="absolute top-4 right-4">
+              <Badge variant="destructive" className="text-lg font-semibold transform rotate-12">
+                Продано
+              </Badge>
+            </div>
+          )}
         </div>
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
@@ -97,13 +105,17 @@ export default function ProductDetails() {
           </div>
           <p className="text-lg text-muted-foreground mb-6">{product.description}</p>
           <div className="flex gap-4">
-            <Link href="/">
-              <Button variant="outline">Назад к списку</Button>
+            <Link href={product.archived ? "/archive" : "/"}>
+              <Button variant="outline">
+                {product.archived ? "Назад к архиву" : "Назад к списку"}
+              </Button>
             </Link>
-            <Button onClick={handleBuyClick} className="bg-gradient-to-r from-amber-700 to-amber-500">
-              <MessageCircle className="mr-2 h-4 w-4" />
-              Купить
-            </Button>
+            {!product.archived && (
+              <Button onClick={handleBuyClick} className="bg-gradient-to-r from-amber-700 to-amber-500">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Купить
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
