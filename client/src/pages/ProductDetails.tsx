@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { Product } from "@shared/schema";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
 export default function ProductDetails() {
@@ -53,6 +53,10 @@ export default function ProductDetails() {
     );
   };
 
+  const handleBuyClick = () => {
+    window.open('https://t.me/your_telegram_username', '_blank');
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card>
@@ -93,6 +97,10 @@ export default function ProductDetails() {
             <Link href="/">
               <Button variant="outline">Назад к списку</Button>
             </Link>
+            <Button onClick={handleBuyClick} className="bg-gradient-to-r from-amber-700 to-amber-500">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Купить
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -2,11 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import type { Product } from "@shared/schema";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
 
 export default function Home() {
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
+
+  const handleBuyClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.open('https://t.me/your_telegram_username', '_blank');
+  };
 
   if (isLoading) {
     return (
@@ -45,7 +52,17 @@ export default function Home() {
                 <CardContent className="p-4">
                   <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
                   <p className="text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
-                  <p className="text-lg font-medium">{product.price} ₽</p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-lg font-medium">{product.price} ₽</p>
+                    <Button
+                      onClick={handleBuyClick}
+                      className="bg-gradient-to-r from-amber-700 to-amber-500"
+                      size="sm"
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Купить
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </a>
