@@ -31,16 +31,16 @@ function Navigation() {
                   Leather Craft
                 </a>
               </Link>
+              <Link href="/archive">
+                <a className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                  Архив изделий
+                </a>
+              </Link>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex">
               <Link href="/admin">
                 <a className="inline-flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
                   Админ панель
-                </a>
-              </Link>
-              <Link href="/archive">
-                <a className="inline-flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-                  Архив
                 </a>
               </Link>
             </div>

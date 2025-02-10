@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -40,6 +41,10 @@ export default function Admin() {
     queryKey: ["/api/products"],
   });
 
+  const { data: archivedProducts, isLoading: isLoadingArchived } = useQuery<Product[]>({
+    queryKey: ["/api/products/archived"],
+  });
+
   const createProduct = useMutation({
     mutationFn: async (data: InsertProduct) => {
       await apiRequest("POST", "/api/products", data);
@@ -61,6 +66,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products/archived"] });
       form.reset();
       setEditingProduct(null);
       toast({
@@ -76,6 +82,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products/archived"] });
       toast({
         title: "Успех",
         description: "Товар перемещен в архив",
@@ -89,6 +96,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products/archived"] });
       toast({
         title: "Успех",
         description: "Товар удален",
@@ -134,6 +142,68 @@ export default function Admin() {
     } else {
       createProduct.mutate(data);
     }
+  };
+
+  const renderProductList = (items: Product[] | undefined, isLoadingItems: boolean) => {
+    if (isLoadingItems) {
+      return (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4">
+                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                <div className="h-4 bg-muted rounded w-1/4" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {items?.map((product) => (
+          <Card key={product.id}>
+            <CardContent className="p-4 flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">{product.name}</h3>
+                <p className="text-sm text-muted-foreground">{product.price} ₽</p>
+              </div>
+              <div className="flex gap-2">
+                <Link href={`/product/${product.id}`}>
+                  <Button variant="outline" size="icon">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleEdit(product)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                {!product.archived && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => archiveProduct.mutate(product.id)}
+                  >
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => deleteProduct.mutate(product.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -249,59 +319,18 @@ export default function Admin() {
 
         <div>
           <h2 className="text-2xl font-bold mb-6">Управление товарами</h2>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-4">
-                    <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                    <div className="h-4 bg-muted rounded w-1/4" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {products?.map((product) => (
-                <Card key={product.id}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">{product.price} ₽</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href={`/product/${product.id}`}>
-                        <Button variant="outline" size="icon">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(product)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => archiveProduct.mutate(product.id)}
-                      >
-                        <Archive className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => deleteProduct.mutate(product.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <Tabs defaultValue="active">
+            <TabsList className="mb-4">
+              <TabsTrigger value="active">Активные товары</TabsTrigger>
+              <TabsTrigger value="archived">Архив</TabsTrigger>
+            </TabsList>
+            <TabsContent value="active">
+              {renderProductList(products, isLoading)}
+            </TabsContent>
+            <TabsContent value="archived">
+              {renderProductList(archivedProducts, isLoadingArchived)}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

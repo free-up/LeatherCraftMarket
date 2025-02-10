@@ -42,13 +42,13 @@ export default function ProductDetails() {
   }
 
   const nextImage = () => {
-    setCurrentImageIndex((current) => 
+    setCurrentImageIndex((current) =>
       current === product.imageUrls.length - 1 ? 0 : current + 1
     );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((current) => 
+    setCurrentImageIndex((current) =>
       current === 0 ? product.imageUrls.length - 1 : current - 1
     );
   };
@@ -57,7 +57,7 @@ export default function ProductDetails() {
     const productUrl = `${window.location.origin}/product/${product.id}`;
     const message = `Здравствуйте! Интересует товар: ${product.name}\n${productUrl}`;
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://t.me/broncheg?start=${encodedMessage}`, '_blank');
+    window.open(`https://t.me/broncheg?text=${encodedMessage}`, '_blank');
   };
 
   return (
