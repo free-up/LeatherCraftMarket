@@ -2,8 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProductSchema } from "@shared/schema";
+import { uploadRouter } from "./uploadthing";
+import { createRouteHandler } from "uploadthing/express";
 
 export function registerRoutes(app: Express): Server {
+  app.use("/api/uploadthing", createRouteHandler({ router: uploadRouter }));
+
   app.get("/api/products", async (_req, res) => {
     const products = await storage.getProducts();
     res.json(products);

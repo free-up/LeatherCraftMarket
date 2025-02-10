@@ -2,6 +2,7 @@ import { Switch, Route, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { Footer } from "@/components/ui/Footer";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Admin from "@/pages/Admin";
@@ -16,7 +17,7 @@ function Navigation() {
           <div className="absolute inset-0 bg-black/30">
             <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-center">
               <h1 className="text-4xl font-bold text-white text-center">
-                Мастерская кожаных изделий
+                Кожаные изделия ручной работы KoBro
               </h1>
             </div>
           </div>
@@ -28,7 +29,7 @@ function Navigation() {
             <div className="flex">
               <Link href="/">
                 <a className="flex items-center px-2 py-2 text-lg font-medium">
-                  Leather Craft
+                  KoBro
                 </a>
               </Link>
               <Link href="/archive">
@@ -54,9 +55,9 @@ function Navigation() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navigation />
-        <main>
+        <main className="flex-grow">
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/admin" component={Admin} />
@@ -65,6 +66,7 @@ function App() {
             <Route component={NotFound} />
           </Switch>
         </main>
+        <Footer />
       </div>
       <Toaster />
     </QueryClientProvider>

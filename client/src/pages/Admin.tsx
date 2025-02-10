@@ -22,6 +22,7 @@ import type { InsertProduct } from "@shared/schema";
 import { Archive, Trash2, Eye, Pencil } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { UploadButton } from "@/lib/uploadthing";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -264,10 +265,27 @@ export default function Admin() {
                   name={`imageUrls.${index}`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>URL изображения {index + 1}</FormLabel>
+                      <FormLabel>Изображение {index + 1}</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
-                          <Input {...field} type="url" />
+                          <div className="flex gap-2 items-center">
+                            <Input {...field} type="url" placeholder="URL изображения" />
+                            <UploadButton
+                              endpoint="imageUploader"
+                              onClientUploadComplete={(res) => {
+                                if (res?.[0]) {
+                                  field.onChange(res[0].url);
+                                }
+                              }}
+                              onUploadError={(error: Error) => {
+                                toast({
+                                  title: "Ошибка загрузки",
+                                  description: error.message,
+                                  variant: "destructive",
+                                });
+                              }}
+                            />
+                          </div>
                         </FormControl>
                         {index > 0 && (
                           <Button
