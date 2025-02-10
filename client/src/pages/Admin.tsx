@@ -20,9 +20,12 @@ import { insertProductSchema } from "@shared/schema";
 import type { InsertProduct } from "@shared/schema";
 import { Archive, Trash2, Eye, Pencil } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
 
 export default function Admin() {
   const { toast } = useToast();
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
@@ -44,9 +47,25 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       form.reset();
+      setEditingProduct(null);
       toast({
         title: "Успех",
         description: "Товар успешно создан",
+      });
+    },
+  });
+
+  const updateProduct = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: InsertProduct }) => {
+      await apiRequest("PATCH", `/api/products/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      form.reset();
+      setEditingProduct(null);
+      toast({
+        title: "Успех",
+        description: "Товар успешно обновлен",
       });
     },
   });
@@ -89,13 +108,43 @@ export default function Admin() {
     }
   };
 
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    form.reset({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      imageUrls: product.imageUrls,
+    });
+  };
+
+  const handleCancel = () => {
+    setEditingProduct(null);
+    form.reset({
+      name: "",
+      description: "",
+      price: "",
+      imageUrls: [""],
+    });
+  };
+
+  const onSubmit = (data: InsertProduct) => {
+    if (editingProduct) {
+      updateProduct.mutate({ id: editingProduct.id, data });
+    } else {
+      createProduct.mutate(data);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-2xl font-bold mb-6">Добавить новый товар</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            {editingProduct ? "Редактировать товар" : "Добавить новый товар"}
+          </h2>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => createProduct.mutate(data))} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -176,13 +225,24 @@ export default function Admin() {
                 Добавить еще изображение
               </Button>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={createProduct.isPending}
-              >
-                Добавить товар
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={createProduct.isPending || updateProduct.isPending}
+                >
+                  {editingProduct ? "Сохранить изменения" : "Добавить товар"}
+                </Button>
+                {editingProduct && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                  >
+                    Отмена
+                  </Button>
+                )}
+              </div>
             </form>
           </Form>
         </div>
@@ -215,6 +275,13 @@ export default function Admin() {
                           <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleEdit(product)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="outline"
                         size="icon"

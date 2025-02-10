@@ -5,6 +5,7 @@ export interface IStorage {
   getArchivedProducts(): Promise<Product[]>;
   getProduct(id: number): Promise<Product>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: InsertProduct): Promise<Product>;
   archiveProduct(id: number): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
 }
@@ -42,6 +43,18 @@ export class MemStorage implements IStorage {
     };
     this.products.set(id, product);
     return product;
+  }
+
+  async updateProduct(id: number, insertProduct: InsertProduct): Promise<Product> {
+    const existingProduct = this.products.get(id);
+    if (!existingProduct) throw new Error("Product not found");
+
+    const updatedProduct: Product = {
+      ...existingProduct,
+      ...insertProduct,
+    };
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
   }
 
   async archiveProduct(id: number): Promise<Product> {
