@@ -3,6 +3,7 @@ import { products, type Product, type InsertProduct } from "@shared/schema";
 export interface IStorage {
   getProducts(): Promise<Product[]>;
   getArchivedProducts(): Promise<Product[]>;
+  getProduct(id: number): Promise<Product>;
   createProduct(product: InsertProduct): Promise<Product>;
   archiveProduct(id: number): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
@@ -25,6 +26,12 @@ export class MemStorage implements IStorage {
     return Array.from(this.products.values()).filter(p => p.archived);
   }
 
+  async getProduct(id: number): Promise<Product> {
+    const product = this.products.get(id);
+    if (!product) throw new Error("Product not found");
+    return product;
+  }
+
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = this.currentId++;
     const product: Product = {
@@ -40,7 +47,7 @@ export class MemStorage implements IStorage {
   async archiveProduct(id: number): Promise<Product> {
     const product = this.products.get(id);
     if (!product) throw new Error("Product not found");
-    
+
     const updated = { ...product, archived: true };
     this.products.set(id, updated);
     return updated;

@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Admin from "@/pages/Admin";
 import Archive from "@/pages/Archive";
+import ProductDetails from "@/pages/ProductDetails";
 
 function Navigation() {
   return (
@@ -47,6 +48,7 @@ function App() {
             <Route path="/" component={Home} />
             <Route path="/admin" component={Admin} />
             <Route path="/archive" component={Archive} />
+            <Route path="/product/:id" component={ProductDetails} />
             <Route component={NotFound} />
           </Switch>
         </main>
