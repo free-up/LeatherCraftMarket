@@ -54,7 +54,10 @@ export default function ProductDetails() {
   };
 
   const handleBuyClick = () => {
-    window.open('https://t.me/your_telegram_username', '_blank');
+    const productUrl = `${window.location.origin}/product/${product.id}`;
+    const message = `Здравствуйте! Интересует товар: ${product.name}\n${productUrl}`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://t.me/broncheg?start=${encodedMessage}`, '_blank');
   };
 
   return (

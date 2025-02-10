@@ -10,9 +10,12 @@ export default function Home() {
     queryKey: ["/api/products"],
   });
 
-  const handleBuyClick = (e: React.MouseEvent) => {
+  const handleBuyClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
-    window.open('https://t.me/your_telegram_username', '_blank');
+    const productUrl = `${window.location.origin}/product/${product.id}`;
+    const message = `Здравствуйте! Интересует товар: ${product.name}\n${productUrl}`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://t.me/broncheg?start=${encodedMessage}`, '_blank');
   };
 
   if (isLoading) {
@@ -55,7 +58,7 @@ export default function Home() {
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-medium">{product.price} ₽</p>
                     <Button
-                      onClick={handleBuyClick}
+                      onClick={(e) => handleBuyClick(e, product)}
                       className="bg-gradient-to-r from-amber-700 to-amber-500"
                       size="sm"
                     >
