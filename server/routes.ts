@@ -9,6 +9,11 @@ export function registerRoutes(app: Express): Server {
     res.json(products);
   });
 
+  app.get("/api/products/archived", async (_req, res) => {
+    const products = await storage.getArchivedProducts();
+    res.json(products);
+  });
+
   app.get("/api/products/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -21,11 +26,6 @@ export function registerRoutes(app: Express): Server {
     } catch (err) {
       res.status(404).json({ error: "Product not found" });
     }
-  });
-
-  app.get("/api/products/archived", async (_req, res) => {
-    const products = await storage.getArchivedProducts();
-    res.json(products);
   });
 
   app.post("/api/products", async (req, res) => {

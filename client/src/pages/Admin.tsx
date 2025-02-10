@@ -18,7 +18,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Product } from "@shared/schema";
 import { insertProductSchema } from "@shared/schema";
 import type { InsertProduct } from "@shared/schema";
-import { Archive, Trash2 } from "lucide-react";
+import { Archive, Trash2, Eye, Pencil } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -28,7 +29,7 @@ export default function Admin() {
       name: "",
       description: "",
       price: "",
-      imageUrls: [""], // Updated to handle multiple image URLs
+      imageUrls: [""],
     },
   });
 
@@ -44,8 +45,8 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       form.reset();
       toast({
-        title: "Success",
-        description: "Product created successfully",
+        title: "Успех",
+        description: "Товар успешно создан",
       });
     },
   });
@@ -57,8 +58,8 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
-        title: "Success",
-        description: "Product archived successfully",
+        title: "Успех",
+        description: "Товар перемещен в архив",
       });
     },
   });
@@ -70,17 +71,29 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
-        title: "Success",
-        description: "Product deleted successfully",
+        title: "Успех",
+        description: "Товар удален",
       });
     },
   });
+
+  const addImageField = () => {
+    const currentUrls = form.getValues().imageUrls;
+    form.setValue('imageUrls', [...currentUrls, '']);
+  };
+
+  const removeImageField = (index: number) => {
+    const currentUrls = form.getValues().imageUrls;
+    if (currentUrls.length > 1) {
+      form.setValue('imageUrls', currentUrls.filter((_, i) => i !== index));
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-2xl font-bold mb-6">Add New Product</h2>
+          <h2 className="text-2xl font-bold mb-6">Добавить новый товар</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit((data) => createProduct.mutate(data))} className="space-y-4">
               <FormField
@@ -88,7 +101,7 @@ export default function Admin() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Название</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -102,7 +115,7 @@ export default function Admin() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Описание</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -116,55 +129,66 @@ export default function Admin() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Цена (в рублях)</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="0.00" />
+                      <Input {...field} placeholder="0" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="imageUrls.0"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL изображения (основное)</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="url" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="imageUrls.1"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL изображения (дополнительное)</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="url" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {form.watch('imageUrls').map((_, index) => (
+                <FormField
+                  key={index}
+                  control={form.control}
+                  name={`imageUrls.${index}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL изображения {index + 1}</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input {...field} type="url" />
+                        </FormControl>
+                        {index > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => removeImageField(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addImageField}
+                className="w-full"
+              >
+                Добавить еще изображение
+              </Button>
 
               <Button
                 type="submit"
                 className="w-full"
                 disabled={createProduct.isPending}
               >
-                Add Product
+                Добавить товар
               </Button>
             </form>
           </Form>
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold mb-6">Manage Products</h2>
+          <h2 className="text-2xl font-bold mb-6">Управление товарами</h2>
           {isLoading ? (
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
@@ -183,9 +207,14 @@ export default function Admin() {
                   <CardContent className="p-4 flex justify-between items-center">
                     <div>
                       <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">{product.price} ₽</p> {/* Price in rubles */}
+                      <p className="text-sm text-muted-foreground">{product.price} ₽</p>
                     </div>
                     <div className="flex gap-2">
+                      <Link href={`/product/${product.id}`}>
+                        <Button variant="outline" size="icon">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
                       <Button
                         variant="outline"
                         size="icon"
