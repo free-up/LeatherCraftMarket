@@ -38,14 +38,14 @@ export default function Home() {
             <a className="block">
               <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                 <img
-                  src={product.imageUrl}
+                  src={product.imageUrls[0]}
                   alt={product.name}
                   className="h-64 w-full object-cover"
                 />
                 <CardContent className="p-4">
                   <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
                   <p className="text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
-                  <p className="text-lg font-medium">${product.price}</p>
+                  <p className="text-lg font-medium">{product.price} ₽</p>
                 </CardContent>
               </Card>
             </a>

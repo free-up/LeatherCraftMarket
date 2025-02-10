@@ -4,10 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { Product } from "@shared/schema";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
-  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: [`/api/products/${id}`],
   });
@@ -38,20 +41,52 @@ export default function ProductDetails() {
     );
   }
 
+  const nextImage = () => {
+    setCurrentImageIndex((current) => 
+      current === product.imageUrls.length - 1 ? 0 : current + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((current) => 
+      current === 0 ? product.imageUrls.length - 1 : current - 1
+    );
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card>
         <div className="aspect-w-16 aspect-h-9 relative">
           <img
-            src={product.imageUrl}
-            alt={product.name}
+            src={product.imageUrls[currentImageIndex]}
+            alt={`${product.name} - изображение ${currentImageIndex + 1}`}
             className="w-full h-96 object-cover rounded-t-lg"
           />
+          {product.imageUrls.length > 1 && (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2"
+                onClick={prevImage}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2"
+                onClick={nextImage}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </>
+          )}
         </div>
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-3xl font-bold">{product.name}</h1>
-            <p className="text-2xl font-semibold">${product.price}</p>
+            <p className="text-2xl font-semibold">{product.price} ₽</p>
           </div>
           <p className="text-lg text-muted-foreground mb-6">{product.description}</p>
           <div className="flex gap-4">

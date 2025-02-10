@@ -28,7 +28,7 @@ export default function Admin() {
       name: "",
       description: "",
       price: "",
-      imageUrl: "",
+      imageUrls: [""], // Updated to handle multiple image URLs
     },
   });
 
@@ -96,7 +96,7 @@ export default function Admin() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="description"
@@ -110,7 +110,7 @@ export default function Admin() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="price"
@@ -124,13 +124,26 @@ export default function Admin() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
-                name="imageUrl"
+                name="imageUrls.0"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>URL изображения (основное)</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="url" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="imageUrls.1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL изображения (дополнительное)</FormLabel>
                     <FormControl>
                       <Input {...field} type="url" />
                     </FormControl>
@@ -170,7 +183,7 @@ export default function Admin() {
                   <CardContent className="p-4 flex justify-between items-center">
                     <div>
                       <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">${product.price}</p>
+                      <p className="text-sm text-muted-foreground">{product.price} ₽</p> {/* Price in rubles */}
                     </div>
                     <div className="flex gap-2">
                       <Button

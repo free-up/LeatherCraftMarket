@@ -7,7 +7,7 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: text("price").notNull(),
-  imageUrl: text("imageUrl").notNull(),
+  imageUrls: text("imageUrls").array().notNull(),
   archived: boolean("archived").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -15,8 +15,8 @@ export const products = pgTable("products", {
 export const insertProductSchema = createInsertSchema(products)
   .omit({ id: true, archived: true, createdAt: true })
   .extend({
-    price: z.string().regex(/^\d+(\.\d{2})?$/, "Price must be a valid amount"),
-    imageUrl: z.string().url("Must be a valid URL"),
+    price: z.string().regex(/^\d+$/, "Цена должна быть указана в рублях"),
+    imageUrls: z.array(z.string().url("Должен быть действительный URL")).min(1, "Добавьте хотя бы одно изображение"),
   });
 
 export type Product = typeof products.$inferSelect;
