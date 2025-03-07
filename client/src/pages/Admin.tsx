@@ -222,6 +222,7 @@ export default function Admin() {
       }
 
       const data = await response.json();
+      // Устанавливаем значение поля на полученный URL
       field.onChange(data.url);
       toast({
         title: "Успешно",
