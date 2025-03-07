@@ -136,6 +136,25 @@ export function registerRoutes(app: Express): Server {
       res.status(404).json({ error: "Product not found" });
     }
   });
+  
+  // API для работы с настройками сайта
+  app.get("/api/settings", async (_req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch (err) {
+      res.status(500).json({ error: "Не удалось получить настройки" });
+    }
+  });
+  
+  app.post("/api/settings", async (req, res) => {
+    try {
+      const settings = await storage.updateSettings(req.body);
+      res.json(settings);
+    } catch (err) {
+      res.status(500).json({ error: "Не удалось обновить настройки" });
+    }
+  });
 
   return createServer(app);
 }

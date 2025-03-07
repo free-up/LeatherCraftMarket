@@ -315,7 +315,6 @@ export default function Admin() {
                             />
                             <Button
                               type="button"
-                              onClick={() => document.getElementById(`file-upload-${index}`)?.click()}
                               variant="outline"
                               size="sm"
                               onClick={() => document.getElementById(`file-upload-${index}`)?.click()}

@@ -1,5 +1,9 @@
 import { products, type Product, type InsertProduct } from "@shared/schema";
 
+export interface SiteSettings {
+  headerImage?: string;
+}
+
 export interface IStorage {
   getProducts(): Promise<Product[]>;
   getArchivedProducts(): Promise<Product[]>;
@@ -8,15 +12,19 @@ export interface IStorage {
   updateProduct(id: number, product: InsertProduct): Promise<Product>;
   archiveProduct(id: number): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
+  getSettings(): Promise<SiteSettings>;
+  updateSettings(settings: SiteSettings): Promise<SiteSettings>;
 }
 
 export class MemStorage implements IStorage {
   private products: Map<number, Product>;
   private currentId: number;
+  private settings: SiteSettings;
 
   constructor() {
     this.products = new Map();
     this.currentId = 1;
+    this.settings = { headerImage: '' };
   }
 
   async getProducts(): Promise<Product[]> {
@@ -69,6 +77,15 @@ export class MemStorage implements IStorage {
   async deleteProduct(id: number): Promise<void> {
     if (!this.products.has(id)) throw new Error("Product not found");
     this.products.delete(id);
+  }
+
+  async getSettings(): Promise<SiteSettings> {
+    return this.settings;
+  }
+
+  async updateSettings(settings: SiteSettings): Promise<SiteSettings> {
+    this.settings = { ...this.settings, ...settings };
+    return this.settings;
   }
 }
 
