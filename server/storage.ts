@@ -1,8 +1,36 @@
 import { products, type Product, type InsertProduct } from "@shared/schema";
 
-export interface SiteSettings {
-  headerImage?: string;
+// Хранение настроек сайта
+interface SiteSettings {
+  siteName: string;
+  mainTitle: string;
+  mainDescription: string;
+  cardSize: {
+    width: number;
+    height: number;
+  };
+  sections: {
+    home: string;
+    archive: string;
+    admin: string;
+  };
 }
+
+// Сохраняем настройки сайта в памяти (в реальном проекте нужно хранить в базе данных)
+let siteSettings: SiteSettings = {
+  siteName: 'KoBro',
+  mainTitle: 'Кожаные изделия ручной работы KoBro',
+  mainDescription: 'Качественные изделия из натуральной кожи',
+  cardSize: {
+    width: 300,
+    height: 400,
+  },
+  sections: {
+    home: 'Главная',
+    archive: 'Архив изделий',
+    admin: 'Админ панель',
+  }
+};
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -24,7 +52,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.products = new Map();
     this.currentId = 1;
-    this.settings = { headerImage: '' };
+    this.settings = { siteName: '', mainTitle: '', mainDescription: '', cardSize: {width: 0, height: 0}, sections: {home: '', archive: '', admin: ''} };
   }
 
   async getProducts(): Promise<Product[]> {
@@ -80,12 +108,12 @@ export class MemStorage implements IStorage {
   }
 
   async getSettings(): Promise<SiteSettings> {
-    return this.settings;
+    return siteSettings;
   }
 
   async updateSettings(settings: SiteSettings): Promise<SiteSettings> {
-    this.settings = { ...this.settings, ...settings };
-    return this.settings;
+    siteSettings = { ...siteSettings, ...settings };
+    return siteSettings;
   }
 }
 

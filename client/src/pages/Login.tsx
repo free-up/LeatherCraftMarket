@@ -1,11 +1,11 @@
-
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
+import axios from 'axios'; // Added import for axios
 
 export default function Login() {
   const [password, setPassword] = useState('');
@@ -14,18 +14,22 @@ export default function Login() {
   const { login } = useAuth();
   const [, setLocation] = useLocation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      await login(password);
-      // После успешной авторизации перенаправляем на админ-панель
-      setLocation('/admin');
+      const response = await axios.post('/api/auth/login', { password });
+      if (response.data && response.data.token) {
+        login(response.data.token);
+        // Перенаправление добавлено внутри функции login в AuthProvider
+      } else {
+        setError('Не удалось авторизоваться. Попробуйте еще раз.');
+      }
     } catch (err) {
-      console.error('Ошибка входа:', err);
-      setError(err instanceof Error ? err.message : 'Произошла ошибка при входе');
+      console.error('Ошибка при входе:', err);
+      setError('Неверный пароль');
     } finally {
       setIsLoading(false);
     }
