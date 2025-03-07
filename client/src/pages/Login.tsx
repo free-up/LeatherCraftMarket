@@ -68,10 +68,6 @@ export default function Login() {
               {isLoading ? 'Выполняется вход...' : 'Войти'}
             </Button>
           </CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Выполняется вход...' : 'Войти'}
-            </Button>
-          </CardFooter>
         </form>
       </Card>
     </div>

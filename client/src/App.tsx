@@ -12,7 +12,8 @@ import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Button from "@/components/ui/Button"; // Assumed component
+import { Button } from "@/components/ui/Button"; // Assumed component
+import React from 'react';
 
 
 // Assumed useAuth hook
