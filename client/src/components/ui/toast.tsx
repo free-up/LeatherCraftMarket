@@ -125,3 +125,6 @@ export {
   ToastClose,
   ToastAction,
 }
+
+// Re-export useToast for backwards compatibility
+export { useToast } from "./use-toast"
