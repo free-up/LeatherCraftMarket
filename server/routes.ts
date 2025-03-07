@@ -40,12 +40,20 @@ export function registerRoutes(app: Express): Server {
   app.use('/uploads', express.static('uploads'));
 
   // Маршрут для загрузки изображений
-  app.post("/api/upload", upload.single('image'), (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "Файл не был загружен" });
-    }
-    const imageUrl = `/uploads/${req.file.filename}`;
-    res.json({ url: imageUrl });
+  app.post("/api/upload", (req, res) => {
+    upload.single('image')(req, res, (err) => {
+      if (err) {
+        console.error('Ошибка загрузки файла:', err);
+        return res.status(400).json({ error: err.message });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ error: "Файл не был загружен" });
+      }
+      
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ url: imageUrl });
+    });
   });
 
   app.get("/api/products", async (_req, res) => {

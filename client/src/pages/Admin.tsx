@@ -217,7 +217,8 @@ export default function Admin() {
       });
 
       if (!response.ok) {
-        throw new Error('Ошибка загрузки файла');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Ошибка загрузки файла');
       }
 
       const data = await response.json();
@@ -227,6 +228,7 @@ export default function Admin() {
         description: "Изображение загружено",
       });
     } catch (error) {
+      console.error('Ошибка загрузки файла:', error);
       toast({
         title: "Ошибка загрузки",
         description: (error as Error).message,
@@ -312,6 +314,7 @@ export default function Admin() {
                             />
                             <Button
                               type="button"
+                              onClick={() => document.getElementById(`file-upload-${index}`)?.click()}
                               variant="outline"
                               size="sm"
                               onClick={() => document.getElementById(`file-upload-${index}`)?.click()}
