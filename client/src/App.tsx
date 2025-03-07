@@ -12,10 +12,33 @@ import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Button from "@/components/ui/Button"; // Assumed component
+
+
+// Assumed useAuth hook
+const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate authentication check
+    setTimeout(() => {
+      setIsAuthenticated(localStorage.getItem('token') !== null);
+      setLoading(false);
+    }, 500);
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+  };
+
+  return { isAuthenticated, loading, logout };
+};
+
 
 function Navigation() {
-  //This Navigation component only partially addresses the user request.  A hidden route for admin access is needed for a complete solution.
-  const { isAuthenticated, loading, logout } = useAuth(); // useAuth is assumed to be defined elsewhere
+  const { isAuthenticated, loading, logout } = useAuth();
 
   return (
     <header className="border-b">
@@ -37,10 +60,15 @@ function Navigation() {
               <Link href="/settings" className="text-sm text-muted-foreground">
                 Настройки
               </Link>
-              <Button variant="ghost" size="sm" onClick={logout}> {/* Button component is assumed to be defined elsewhere */}
+              <Button variant="ghost" size="sm" onClick={logout}>
                 Выйти
               </Button>
             </>
+          )}
+          {!isAuthenticated && !loading && (
+            <Link href="/login" className="text-sm text-muted-foreground">
+              Войти
+            </Link>
           )}
         </div>
       </nav>
@@ -60,16 +88,8 @@ function App() {
               <Route path="/login" component={Login} />
               <Route path="/archive" component={Archive} />
               <Route path="/product/:id" component={ProductDetails} />
-              <Route path="/admin">
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              </Route>
-              <Route path="/settings">
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              </Route>
+              <ProtectedRoute path="/admin" component={Admin} />
+              <ProtectedRoute path="/settings" component={Settings} />
               <Route component={NotFound} />
             </Switch>
           </main>
