@@ -111,9 +111,11 @@ const reducer = (state: State, action: Action): State => {
   }
 }
 
+let dispatchAction: (action: Action) => void = () => {};
+
 const setToastTimeout = (id: string) => {
   const timeout = setTimeout(() => {
-    dispatch({
+    dispatchAction({
       type: "REMOVE_TOAST",
       toastId: id,
     })
@@ -122,13 +124,11 @@ const setToastTimeout = (id: string) => {
   toastTimeouts.set(id, timeout)
 }
 
-const dispatch = (action: Action) => {}
-
 export const useToast = () => {
   const [state, setState] = React.useState<State>({ toasts: [] })
 
   React.useEffect(() => {
-    dispatch = (action) => {
+    dispatchAction = (action) => {
       setState((prevState) => reducer(prevState, action))
     }
   }, [])
@@ -139,13 +139,13 @@ export const useToast = () => {
       const id = genId()
 
       const update = (props: ToasterToast) =>
-        dispatch({
+        dispatchAction({
           type: "UPDATE_TOAST",
           toast: { ...props, id },
         })
-      const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+      const dismiss = () => dispatchAction({ type: "DISMISS_TOAST", toastId: id })
 
-      dispatch({
+      dispatchAction({
         type: "ADD_TOAST",
         toast: {
           ...props,
@@ -163,8 +163,8 @@ export const useToast = () => {
         update,
       }
     },
-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
-    remove: (toastId?: string) => dispatch({ type: "REMOVE_TOAST", toastId }),
+    dismiss: (toastId?: string) => dispatchAction({ type: "DISMISS_TOAST", toastId }),
+    remove: (toastId?: string) => dispatchAction({ type: "REMOVE_TOAST", toastId }),
   }
 }
 
