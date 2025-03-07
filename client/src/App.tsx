@@ -8,7 +8,10 @@ import Home from "@/pages/Home";
 import Admin from "@/pages/Admin";
 import Archive from "@/pages/Archive";
 import ProductDetails from "@/pages/ProductDetails";
-import Settings from "@/pages/Settings"; // Added import for Settings component
+import Settings from "@/pages/Settings";
+import Login from "@/pages/Login";
+import { AuthProvider } from "@/components/AuthProvider";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function Navigation() {
   return (
@@ -40,7 +43,7 @@ function Navigation() {
               </Link>
             </div>
             <div className="flex">
-              <Link href="/admin">
+              <Link href="/login"> {/* Changed link to login page */}
                 <a className="inline-flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
                   Админ панель
                 </a>
@@ -54,23 +57,36 @@ function Navigation() {
 }
 
 function App() {
+  const queryClient = new QueryClient();
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navigation />
-        <main className="flex-grow">
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/admin" component={Admin} />
-            <Route path="/archive" component={Archive} />
-            <Route path="/product/:id" component={ProductDetails} />
-            <Route path="/settings" component={Settings} /> {/* Added route for Settings */}
-            <Route component={NotFound} />
-          </Switch>
-        </main>
-        <Footer />
-      </div>
-      <Toaster />
+      <AuthProvider>
+        <div className="min-h-screen bg-background flex flex-col">
+          <Navigation />
+          <main className="flex-grow">
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/login" component={Login} />
+              <Route path="/archive" component={Archive} />
+              <Route path="/product/:id" component={ProductDetails} />
+              <Route path="/admin">
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/settings">
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              </Route>
+              <Route component={NotFound} />
+            </Switch>
+          </main>
+          <Footer />
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

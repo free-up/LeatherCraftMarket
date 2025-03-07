@@ -6,6 +6,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import express from 'express';
+import { authenticateToken, verifyPassword, generateToken, type AuthRequest } from './auth';
 
 // Настройка multer для загрузки изображений
 const upload = multer({
@@ -39,8 +40,25 @@ export function registerRoutes(app: Express): Server {
   // Статический маршрут для загруженных файлов
   app.use('/uploads', express.static('uploads'));
 
+  // Маршрут для аутентификации
+  app.post("/api/auth/login", (req, res) => {
+    const { password } = req.body;
+    
+    if (!password || !verifyPassword(password)) {
+      return res.status(401).json({ error: "Неверный пароль" });
+    }
+    
+    const token = generateToken();
+    res.json({ token });
+  });
+  
+  // Проверка статуса аутентификации
+  app.get("/api/auth/status", authenticateToken, (req: AuthRequest, res) => {
+    res.json({ isAuthenticated: true });
+  });
+
   // Маршрут для загрузки изображений
-  app.post("/api/upload", (req, res) => {
+  app.post("/api/upload", authenticateToken, (req: AuthRequest, res) => {
     upload.single('image')(req, res, (err) => {
       if (err) {
         console.error('Ошибка загрузки файла:', err);
@@ -80,7 +98,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/products", async (req, res) => {
+  app.post("/api/products", authenticateToken, async (req: AuthRequest, res) => {
     const result = insertProductSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: result.error });
@@ -90,7 +108,7 @@ export function registerRoutes(app: Express): Server {
     res.status(201).json(product);
   });
 
-  app.patch("/api/products/:id", async (req, res) => {
+  app.patch("/api/products/:id", authenticateToken, async (req: AuthRequest, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid ID" });
@@ -109,7 +127,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/products/:id/archive", async (req, res) => {
+  app.post("/api/products/:id/archive", authenticateToken, async (req: AuthRequest, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid ID" });
@@ -123,7 +141,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.delete("/api/products/:id", async (req, res) => {
+  app.delete("/api/products/:id", authenticateToken, async (req: AuthRequest, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid ID" });
@@ -147,7 +165,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
   
-  app.post("/api/settings", async (req, res) => {
+  app.post("/api/settings", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const settings = await storage.updateSettings(req.body);
       res.json(settings);

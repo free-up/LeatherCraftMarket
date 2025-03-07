@@ -20,7 +20,7 @@ import type { Product } from "@shared/schema";
 import { insertProductSchema } from "@shared/schema";
 import type { InsertProduct } from "@shared/schema";
 import { Archive, Trash2, Eye, Pencil } from "lucide-react";
-import { Link } from "wouter";
+import Link from "wouter/link";
 import { useState } from "react";
 
 export default function Admin() {

@@ -1,6 +1,7 @@
-
 import React, { useEffect, useState } from "react";
-import { Link } from "wouter";
+import Link from "wouter/link";
+import { useAuth } from "./AuthProvider";
+import { Button } from "./ui/button";
 
 export interface SiteSettings {
   headerImage?: string;
@@ -8,6 +9,7 @@ export interface SiteSettings {
 
 const Navigation: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings>({});
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -48,19 +50,36 @@ const Navigation: React.FC = () => {
             </Link>
           </div>
 
-          <div className="hidden md:flex space-x-4">
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/">
               <a className="px-3 py-2 rounded hover:bg-slate-100">Главная</a>
             </Link>
             <Link href="/catalog">
               <a className="px-3 py-2 rounded hover:bg-slate-100">Каталог</a>
             </Link>
-            <Link href="/admin">
-              <a className="px-3 py-2 rounded hover:bg-slate-100">Админ</a>
-            </Link>
-            <Link href="/settings">
-              <a className="px-3 py-2 rounded hover:bg-slate-100">Настройки</a>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link href="/admin">
+                  <a className="px-3 py-2 rounded hover:bg-slate-100">
+                    Админка
+                  </a>
+                </Link>
+                <Link href="/settings">
+                  <a className="px-3 py-2 rounded hover:bg-slate-100">
+                    Настройки
+                  </a>
+                </Link>
+                <Button variant="outline" size="sm" onClick={logout}>
+                  Выйти
+                </Button>
+              </>
+            ) : (
+              <Link href="/login">
+                <a className="px-3 py-2 rounded hover:bg-slate-100">
+                  Вход
+                </a>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
