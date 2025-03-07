@@ -113,6 +113,37 @@ const reducer = (state: State, action: Action): State => {
 
 let dispatchAction: (action: Action) => void = () => {};
 
+// Create a toast function that can be imported directly
+export const toast = {
+  toast: (props: Omit<ToasterToast, "id">) => {
+    const id = genId()
+    
+    dispatchAction({
+      type: "ADD_TOAST",
+      toast: {
+        ...props,
+        id,
+        open: true,
+        onOpenChange: (open) => {
+          if (!open) dispatchAction({ type: "DISMISS_TOAST", toastId: id })
+        },
+      },
+    })
+    
+    return {
+      id,
+      dismiss: () => dispatchAction({ type: "DISMISS_TOAST", toastId: id }),
+      update: (props: ToasterToast) => 
+        dispatchAction({
+          type: "UPDATE_TOAST",
+          toast: { ...props, id },
+        })
+    }
+  },
+  dismiss: (toastId?: string) => dispatchAction({ type: "DISMISS_TOAST", toastId }),
+  remove: (toastId?: string) => dispatchAction({ type: "REMOVE_TOAST", toastId }),
+}
+
 const setToastTimeout = (id: string) => {
   const timeout = setTimeout(() => {
     dispatchAction({
