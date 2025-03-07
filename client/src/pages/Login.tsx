@@ -1,75 +1,67 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import axios from "axios";
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Login() {
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    
+    setError('');
+    setIsLoading(true);
+
     try {
-      const response = await axios.post("/api/auth/login", { password });
-      
-      // Сохраняем токен в localStorage
-      localStorage.setItem("auth_token", response.data.token);
-      
-      toast({
-        title: "Успешный вход",
-        description: "Вы успешно вошли в систему",
-      });
-      
-      // Перенаправление на админку
-      setLocation("/admin");
-    } catch (error) {
-      toast({
-        title: "Ошибка входа",
-        description: "Неверный пароль",
-        variant: "destructive",
-      });
+      await login(password);
+      // После успешной авторизации перенаправляем на админ-панель
+      setLocation('/admin');
+    } catch (err) {
+      console.error('Ошибка входа:', err);
+      setError(err instanceof Error ? err.message : 'Произошла ошибка при входе');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-screen py-10">
-      <Card className="w-full max-w-md">
+    <div className="container mx-auto max-w-md py-12">
+      <Card>
         <CardHeader>
-          <CardTitle>Вход в админку</CardTitle>
+          <CardTitle>Вход в панель администратора</CardTitle>
           <CardDescription>
-            Введите пароль для входа в административную панель
+            Введите пароль администратора для доступа к панели управления
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <CardContent>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="password">Пароль</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Введите пароль администратора"
                   autoComplete="current-password"
-                  required
                 />
               </div>
+              {error && (
+                <div className="text-sm text-red-500">{error}</div>
+              )}
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit" disabled={loading}>
-              {loading ? "Вход..." : "Войти"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Выполняется вход...' : 'Войти'}
             </Button>
           </CardFooter>
         </form>

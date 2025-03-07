@@ -1,5 +1,4 @@
-
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import axios from "axios";
 import { useLocation } from "wouter";
 
@@ -7,22 +6,25 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   logout: () => void;
+  login: (token: string) => void; // Added login function
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   loading: true,
-  logout: () => {},
+  logout: () => { },
+  login: () => { } // Added login function
 });
 
 export const useAuth = () => useContext(AuthContext);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+
+// Custom hook implementation
+const useAuthProvider = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [, setLocation] = useLocation();
 
-  // Настройка axios для отправки токена с каждым запросом
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (token) {
@@ -30,28 +32,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated]);
 
-  // Проверка статуса аутентификации
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("auth_token");
-      
+
       if (!token) {
         setLoading(false);
         return;
       }
-      
+
       try {
         await axios.get("/api/auth/status");
         setIsAuthenticated(true);
       } catch (error) {
-        // Если токен недействителен - удаляем его
         localStorage.removeItem("auth_token");
         delete axios.defaults.headers.common["Authorization"];
       } finally {
         setLoading(false);
       }
     };
-    
+
     checkAuthStatus();
   }, []);
 
@@ -62,8 +62,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLocation("/login");
   };
 
+  const login = (token: string) => {
+    localStorage.setItem("auth_token", token);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    setIsAuthenticated(true);
+    setLocation('/admin'); // Redirect to admin page after successful login
+  };
+
+  return { isAuthenticated, loading, logout, login };
+};
+
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const auth = useAuthProvider();
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, logout }}>
+    <AuthContext.Provider value={auth}>
       {children}
     </AuthContext.Provider>
   );
